@@ -10,7 +10,6 @@ const port = process.env.PORT || 4000
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.sfmoe.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-console.log(process.env.DB_USER)
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
@@ -46,6 +45,16 @@ client.connect(err => {
   //find product
   app.get('/products', (req, res) => {
     collection.find()
+    .toArray((error, documents) => {
+      res.send(documents);
+    })
+  });
+
+  // find order
+  app.get('/orders/:email', (req, res) => {
+    const email = req.params.email;
+    console.log(email)
+    orderCollection.find({customerEmail: email})
     .toArray((error, documents) => {
       res.send(documents);
     })
