@@ -15,6 +15,8 @@ console.log(process.env.DB_USER)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
   const collection = client.db("bazar-sodai").collection("products");
+  const orderCollection = client.db("bazar-sodai").collection("orderProducts");
+
   console.log('connect');
 
   // add product
@@ -28,6 +30,18 @@ client.connect(err => {
       res.send(result.insertedCount > 0);
     })
   }); 
+
+  //add order product
+  app.post('/addOrderProduct', (req, res) => {
+    const newOrder = req.body;
+    console.log('adding new order', newOrder)
+
+    orderCollection.insertOne(newOrder)
+    .then(result => {
+      console.log('inserted count', result.insertedCount);
+      res.send(result.insertedCount > 0);
+    })
+  });
 
   //find product
   app.get('/products', (req, res) => {
@@ -43,7 +57,17 @@ client.connect(err => {
     console.log('detele this id', id);
     collection.findOneAndDelete({_id: id})
     .then(documents => res.send(!! documents.value))
-  })
+  });
+
+  //find product for checkout
+  app.get('/product/:id', (req, res) => {
+    const id = ObjectID(req.params.id)
+    console.log('find this id', id);
+    collection.find({_id: id})
+    .toArray((error, documents) => {
+      res.send(documents);
+    })
+  });
 
 });
 
